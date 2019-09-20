@@ -4,6 +4,38 @@
 	Free for personal and commercial use under the CCA 3.0 license (html5up.net/license)
 */
 
+function sendEmail(button, form, formData, content) {
+  var mailData = {
+    recipient: "contato.cognita@gmail.com",
+    subject: "Novo contato de: " + formData.email,
+    content_html: "<ul>" + content + "</ul>"
+  };
+
+  button.attr("disabled", "disabled");
+  button.html("Aguarde...");
+
+  $.ajax({
+    url: "https://api.idopterlabs.com.br/mailme/notify/now",
+    type: "POST",
+    data: mailData,
+    contentType: "application/x-www-form-urlencoded"
+  })
+    .done(function(data) {
+      form.reset();
+      button.html("Obrigado! :)");
+    })
+    .fail(function(response, status) {
+      button.html("Verifique os dados! :|");
+    })
+    .always(function(data) {
+      button.removeAttr("disabled");
+
+      setTimeout(function() {
+        button.html("Enviar");
+      }, 3000);
+    });
+}
+
 (function($) {
   var $window = $(window),
     $body = $("body"),
@@ -157,6 +189,27 @@
     }
   });
 
+  $("form#newsletter").on("submit", function(e) {
+    e.preventDefault();
+
+    var button = $("button", this);
+    var formData = {};
+    var content = "";
+    var form = this;
+
+    $("form#contact input, textarea").each(function(index, element) {
+      formData[element.name] = $(element).val();
+      content +=
+        "<li><strong>" +
+        element.name +
+        "</strong>: " +
+        formData[element.name] +
+        "</li>";
+    });
+
+    sendEmail(button, form, formData, content);
+  });
+
   $("form#contact").on("submit", function(e) {
     e.preventDefault();
 
@@ -175,34 +228,6 @@
         "</li>";
     });
 
-    var mailData = {
-      recipient: "contato.cognita@gmail.com",
-      subject: "Novo contato de: " + formData.email,
-      content_html: "<ul>" + content + "</ul>"
-    };
-
-    button.attr("disabled", "disabled");
-    button.html("Aguarde...");
-
-    $.ajax({
-      url: "https://api.idopterlabs.com.br/mailme/notify/now",
-      type: "POST",
-      data: mailData,
-      contentType: "application/x-www-form-urlencoded"
-    })
-      .done(function(data) {
-        form.reset();
-        button.html("Obrigado! :)");
-      })
-      .fail(function(response, status) {
-        button.html("Verifique os dados! :|");
-      })
-      .always(function(data) {
-        button.removeAttr("disabled");
-
-        setTimeout(function() {
-          button.html("Enviar");
-        }, 3000);
-      });
+    sendEmail(button, form, formData, content);
   });
 })(jQuery);
