@@ -160,7 +160,7 @@
   $("form#contact").on("submit", function(e) {
     e.preventDefault();
 
-    var button = $("button", this);
+    var button = $("#submit-button", this);
     var formData = {};
     var content = "";
     var form = this;
